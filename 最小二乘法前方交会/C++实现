@@ -62,28 +62,18 @@ void main()
 
 
 					/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
-					x_ji = (-1.0)*f*(rotate[0][0] * (X - Xs) + rotate[1][0] * (Y - Ys)
-						+ rotate[2][0] * (Z - Zs)) / (rotate[0][2] * (X - Xs)
-						+ rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					y_ji = (-1.0)*f*(rotate[0][1] * (X - Xs) + rotate[1][1] * (Y - Ys)
-						+ rotate[2][1] * (Z - Zs)) / (rotate[0][2] * (X - Xs)
-						+ rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-
-					L[i * 2] = ex[j + i][1] / 1000 - x_ji;
-					L[i * 2 + 1] = ex[j + i][2] / 1000 - y_ji;
+					
+					L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) + 
+						(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+					L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
+						(ex[j + i][2]/1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
 					/*求a矩阵*/
-					A[i * 2][0] = (-1.0)*(rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2][1] = (-1.0)*(rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2][2] = (-1.0)*(rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][0] = (-1.0)*(rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][1] = (-1.0)*(rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][2] = (-1.0)*(rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
+					A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
+					A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
+					A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
+					A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
+					A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
+					A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
 
 				}
 
@@ -111,21 +101,13 @@ void main()
 
 				V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
 
-				X_gai = V.at<double>(0, 0);
-				Y_gai = V.at<double>(1, 0);
-				Z_gai = V.at<double>(2, 0);
-
-				X += X_gai;     //计算新的地面点坐标
-				Y += Y_gai;
-				Z += Z_gai;
-				t++;
+				X = V.at<double>(0, 0);
+				Y = V.at<double>(1, 0);
+				Z = V.at<double>(2, 0);
 				
-				if ((fabs(X_gai) < 1e-3) && (fabs(Y_gai) <1e-3) && (fabs(Z_gai) < 1e-3))
-				{
-					cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
-					cout << fixed << setprecision(3) << "迭代次数：" << t << endl << X << "  " << Y << "  " << Z << endl;
-					break;
-				}
+				cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
+				cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z << endl;
+				break;
 			}
 		}
 
@@ -157,28 +139,17 @@ void main()
 
 
 					/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
-					x_ji = (-1.0)*f*(rotate[0][0] * (X - Xs) + rotate[1][0] * (Y - Ys)
-						+ rotate[2][0] * (Z - Zs)) / (rotate[0][2] * (X - Xs)
-						+ rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					y_ji = (-1.0)*f*(rotate[0][1] * (X - Xs) + rotate[1][1] * (Y - Ys)
-						+ rotate[2][1] * (Z - Zs)) / (rotate[0][2] * (X - Xs)
-						+ rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-
-					L[i * 2] = ex[j + i][1] / 1000 - x_ji;
-					L[i * 2 + 1] = ex[j + i][2] / 1000 - y_ji;
+					L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) +
+						(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+					L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
+						(ex[j + i][2] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
 					/*求a矩阵*/
-					A[i * 2][0] = (-1.0)*(rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2][1] = (-1.0)*(rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2][2] = (-1.0)*(rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][0] = (-1.0)*(rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][1] = (-1.0)*(rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][2] = (-1.0)*(rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
+					A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
+					A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
+					A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
+					A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
+					A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
+					A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
 
 				}
 
@@ -206,21 +177,13 @@ void main()
 
 				V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
 
-				X_gai = V.at<double>(0, 0);
-				Y_gai = V.at<double>(1, 0);
-				Z_gai = V.at<double>(2, 0);
-
-				X += X_gai;     //计算新的地面点坐标
-				Y += Y_gai;
-				Z += Z_gai;
-				t++;
+				X = V.at<double>(0, 0);
+				Y = V.at<double>(1, 0);
+				Z = V.at<double>(2, 0);
 				
-				if ((fabs(X_gai) < 1e-3) && (fabs(Y_gai) <1e-3) && (fabs(Z_gai) < 1e-3))
-				{
-					cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
-					cout << fixed << setprecision(3) << "迭代次数：" << t << endl << X << "  " << Y << "  " << Z << endl;
-					break;
-				}
+				cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
+				cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z << endl;
+				break;
 			}		
 		}
 		else if ((ex[j][0] == 7) || (ex[j][0] == 9))
@@ -251,28 +214,17 @@ void main()
 
 
 					/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
-					x_ji = (-1.0)*f*(rotate[0][0] * (X - Xs) + rotate[1][0] * (Y - Ys)
-						+ rotate[2][0] * (Z - Zs)) / (rotate[0][2] * (X - Xs)
-						+ rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					y_ji = (-1.0)*f*(rotate[0][1] * (X - Xs) + rotate[1][1] * (Y - Ys)
-						+ rotate[2][1] * (Z - Zs)) / (rotate[0][2] * (X - Xs)
-						+ rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-
-					L[i * 2] = ex[j + i][1] / 1000 - x_ji;
-					L[i * 2 + 1] = ex[j + i][2] / 1000 - y_ji;
+					L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) +
+						(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+					L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
+						(ex[j + i][2] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
 					/*求a矩阵*/
-					A[i * 2][0] = (-1.0)*(rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2][1] = (-1.0)*(rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2][2] = (-1.0)*(rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][0] = (-1.0)*(rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][1] = (-1.0)*(rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][2] = (-1.0)*(rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
+					A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
+					A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
+					A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
+					A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
+					A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
+					A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
 
 				}
 
@@ -300,21 +252,13 @@ void main()
 
 				V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
 
-				X_gai = V.at<double>(0, 0);
-				Y_gai = V.at<double>(1, 0);
-				Z_gai = V.at<double>(2, 0);
-
-				X += X_gai;     //计算新的地面点坐标
-				Y += Y_gai;
-				Z += Z_gai;
-				t++;
-			
-				if ((fabs(X_gai) < 1e-3) && (fabs(Y_gai) <1e-3) && (fabs(Z_gai) < 1e-3))
-				{
-					cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
-					cout << fixed << setprecision(3) << "迭代次数：" << t << endl << X << "  " << Y << "  " << Z << endl;
-					break;
-				}
+				X = V.at<double>(0, 0);
+				Y = V.at<double>(1, 0);
+				Z = V.at<double>(2, 0);
+				
+				cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
+				cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z << endl;
+				break;
 			}
 		}
 		else if ((ex[j][0] == 8))
@@ -345,28 +289,17 @@ void main()
 
 
 					/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
-					x_ji = (-1.0)*f*(rotate[0][0] * (X - Xs) + rotate[1][0] * (Y - Ys)
-						+ rotate[2][0] * (Z - Zs)) / (rotate[0][2] * (X - Xs)
-						+ rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					y_ji = (-1.0)*f*(rotate[0][1] * (X - Xs) + rotate[1][1] * (Y - Ys)
-						+ rotate[2][1] * (Z - Zs)) / (rotate[0][2] * (X - Xs)
-						+ rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-
-					L[i * 2] = ex[j + i][1] / 1000 - x_ji;
-					L[i * 2 + 1] = ex[j + i][2] / 1000 - y_ji;
+					L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) +
+						(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+					L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
+						(ex[j + i][2] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
 					/*求a矩阵*/
-					A[i * 2][0] = (-1.0)*(rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2][1] = (-1.0)*(rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2][2] = (-1.0)*(rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][0] = (-1.0)*(rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][1] = (-1.0)*(rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
-					A[i * 2 + 1][2] = (-1.0)*(rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000)
-						/ (rotate[0][2] * (X - Xs) + rotate[1][2] * (Y - Ys) + rotate[2][2] * (Z - Zs));
+					A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
+					A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
+					A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
+					A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
+					A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
+					A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
 
 				}
 
@@ -394,22 +327,13 @@ void main()
 
 				V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
 
-				X_gai = V.at<double>(0, 0);
-				Y_gai = V.at<double>(1, 0);
-				Z_gai = V.at<double>(2, 0);
-
-				X += X_gai;     //计算新的地面点坐标
-				Y += Y_gai;
-				Z += Z_gai;
-				t++;
-
-				/*若改正数小于限差，跳出循环*/
-				if ((fabs(X_gai) < 1e-3) && (fabs(Y_gai) <1e-3) && (fabs(Z_gai) < 1e-3))
-				{
-					cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
-					cout << fixed << setprecision(3) << "迭代次数：" << t << endl << X << "  " << Y << "  " << Z<<endl;
-					break;
-				}
+				X = V.at<double>(0, 0);
+				Y = V.at<double>(1, 0);
+				Z = V.at<double>(2, 0);
+				
+				cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
+				cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z<<endl;
+				break;
 			}
 		}
 		j++;
