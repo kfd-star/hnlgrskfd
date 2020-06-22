@@ -41,74 +41,70 @@ void main()
 			double *L = new double[2 * n];     //L矩阵
 			int t = 0;
 
-			while (1)
+			for (int i = 0; i < n; i++)
 			{
-				for (int i = 0; i < n; i++)
-				{
-					double Xs = ex[j + i + 2][1], Ys = ex[j + i + 2][2], Zs = ex[j + i + 2][3];
-					pitch = ex[j + i + 2][4], roll = ex[j + i + 2][5], yaw = ex[j + i + 2][6];
-					//旋转矩阵 phi = pitch, omiga = roll, kapa = yaw,计算旋转矩阵各元素
+				double Xs = ex[j + i + 2][1], Ys = ex[j + i + 2][2], Zs = ex[j + i + 2][3];
+				pitch = ex[j + i + 2][4], roll = ex[j + i + 2][5], yaw = ex[j + i + 2][6];
+				//旋转矩阵 phi = pitch, omiga = roll, kapa = yaw,计算旋转矩阵各元素
 
-					rotate[0][0] = cos(pitch)*cos(yaw) - sin(pitch)*sin(roll)*sin(yaw);
-					rotate[0][1] = (-1.0)*cos(pitch)*sin(yaw) - sin(pitch)*sin(roll)*cos(yaw);
-					rotate[0][2] = (-1.0)*sin(pitch)*cos(roll);
-					rotate[1][0] = cos(roll)*sin(yaw);
-					rotate[1][1] = cos(roll)*cos(yaw);
-					rotate[1][2] = (-1.0)*sin(roll);
-					rotate[2][0] = sin(pitch)*cos(yaw) + cos(pitch)*sin(roll)*sin(yaw);
-					rotate[2][1] = (-1.0)*sin(pitch)*sin(yaw) + cos(pitch)*sin(roll)*cos(yaw);
-					rotate[2][2] = cos(pitch)*cos(roll);
+				rotate[0][0] = cos(pitch)*cos(yaw) - sin(pitch)*sin(roll)*sin(yaw);
+				rotate[0][1] = (-1.0)*cos(pitch)*sin(yaw) - sin(pitch)*sin(roll)*cos(yaw);
+				rotate[0][2] = (-1.0)*sin(pitch)*cos(roll);
+				rotate[1][0] = cos(roll)*sin(yaw);
+				rotate[1][1] = cos(roll)*cos(yaw);
+				rotate[1][2] = (-1.0)*sin(roll);
+				rotate[2][0] = sin(pitch)*cos(yaw) + cos(pitch)*sin(roll)*sin(yaw);
+				rotate[2][1] = (-1.0)*sin(pitch)*sin(yaw) + cos(pitch)*sin(roll)*cos(yaw);
+				rotate[2][2] = cos(pitch)*cos(roll);
 
 
 
-					/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
+				/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
 					
-					L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) + 
-						(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
-					L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
-						(ex[j + i][2]/1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
-					/*求a矩阵*/
-					A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
-					A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
-					A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
-					A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
-					A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
-					A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
+				L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) + 
+					(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+				L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
+					(ex[j + i][2]/1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+				/*求a矩阵*/
+				A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
+				A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
+				A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
+				A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
+				A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
+				A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
 
-				}
-
-				Mat A_(2 * n, 3, CV_64FC1);   //创建Mat数组，便于opencv矩阵运算
-				Mat L_(2 * n, 1, CV_64FC1);
-				Mat V(3, 1, CV_64FC1);
-
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 0) = A[i][0];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 1) = A[i][1];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 2) = A[i][2];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					L_.at<double>(i, 0) = L[i];
-				}
-
-
-				V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
-
-				X = V.at<double>(0, 0);
-				Y = V.at<double>(1, 0);
-				Z = V.at<double>(2, 0);
-				
-				cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
-				cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z << endl;
-				break;
 			}
+
+			Mat A_(2 * n, 3, CV_64FC1);   //创建Mat数组，便于opencv矩阵运算
+			Mat L_(2 * n, 1, CV_64FC1);
+			Mat V(3, 1, CV_64FC1);
+
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 0) = A[i][0];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 1) = A[i][1];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 2) = A[i][2];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				L_.at<double>(i, 0) = L[i];
+			}
+
+
+			V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
+
+			X = V.at<double>(0, 0);
+			Y = V.at<double>(1, 0);
+			Z = V.at<double>(2, 0);
+				
+			cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
+			cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z << endl;
 		}
 
 		else if ((ex[j][0] == 2) || (ex[j][0] == 5) || (ex[j][0] == 11) || (ex[j][0] == 14))
@@ -118,73 +114,69 @@ void main()
 			double *L = new double[2 * n];     //L矩阵
 			int t = 0;
 
-			while (1)
+			for (int i = 0; i < n; i++)
 			{
-				for (int i = 0; i < n; i++)
-				{
-					double Xs = ex[j + i + 3][1], Ys = ex[j + i + 3][2], Zs = ex[j + i + 3][3];
-					pitch = ex[j + i + 3][4], roll = ex[j + i + 3][5], yaw = ex[j + i + 3][6];
-					//旋转矩阵 phi = pitch, omiga = roll, kapa = yaw,计算旋转矩阵各元素
+				double Xs = ex[j + i + 3][1], Ys = ex[j + i + 3][2], Zs = ex[j + i + 3][3];
+				pitch = ex[j + i + 3][4], roll = ex[j + i + 3][5], yaw = ex[j + i + 3][6];
+				//旋转矩阵 phi = pitch, omiga = roll, kapa = yaw,计算旋转矩阵各元素
 
-					rotate[0][0] = cos(pitch)*cos(yaw) - sin(pitch)*sin(roll)*sin(yaw);
-					rotate[0][1] = (-1.0)*cos(pitch)*sin(yaw) - sin(pitch)*sin(roll)*cos(yaw);
-					rotate[0][2] = (-1.0)*sin(pitch)*cos(roll);
-					rotate[1][0] = cos(roll)*sin(yaw);
-					rotate[1][1] = cos(roll)*cos(yaw);
-					rotate[1][2] = (-1.0)*sin(roll);
-					rotate[2][0] = sin(pitch)*cos(yaw) + cos(pitch)*sin(roll)*sin(yaw);
-					rotate[2][1] = (-1.0)*sin(pitch)*sin(yaw) + cos(pitch)*sin(roll)*cos(yaw);
-					rotate[2][2] = cos(pitch)*cos(roll);
+				rotate[0][0] = cos(pitch)*cos(yaw) - sin(pitch)*sin(roll)*sin(yaw);
+				rotate[0][1] = (-1.0)*cos(pitch)*sin(yaw) - sin(pitch)*sin(roll)*cos(yaw);
+				rotate[0][2] = (-1.0)*sin(pitch)*cos(roll);
+				rotate[1][0] = cos(roll)*sin(yaw);
+				rotate[1][1] = cos(roll)*cos(yaw);
+				rotate[1][2] = (-1.0)*sin(roll);
+				rotate[2][0] = sin(pitch)*cos(yaw) + cos(pitch)*sin(roll)*sin(yaw);
+				rotate[2][1] = (-1.0)*sin(pitch)*sin(yaw) + cos(pitch)*sin(roll)*cos(yaw);
+				rotate[2][2] = cos(pitch)*cos(roll);
 
 
 
-					/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
-					L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) +
-						(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
-					L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
-						(ex[j + i][2] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
-					/*求a矩阵*/
-					A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
-					A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
-					A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
-					A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
-					A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
-					A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
+				/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
+				L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) +
+					(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+				L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
+					(ex[j + i][2] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+				/*求a矩阵*/
+				A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
+				A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
+				A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
+				A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
+				A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
+				A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
 
-				}
+			}
 
-				Mat A_(2 * n, 3, CV_64FC1);   //创建Mat数组，便于opencv矩阵运算
-				Mat L_(2 * n, 1, CV_64FC1);
-				Mat V(3, 1, CV_64FC1);
+			Mat A_(2 * n, 3, CV_64FC1);   //创建Mat数组，便于opencv矩阵运算
+			Mat L_(2 * n, 1, CV_64FC1);
+			Mat V(3, 1, CV_64FC1);
 			
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 0) = A[i][0];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 1) = A[i][1];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 2) = A[i][2];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					L_.at<double>(i, 0) = L[i];
-				}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 0) = A[i][0];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 1) = A[i][1];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 2) = A[i][2];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				L_.at<double>(i, 0) = L[i];
+			}
 
 
-				V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
+			V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
 
-				X = V.at<double>(0, 0);
-				Y = V.at<double>(1, 0);
-				Z = V.at<double>(2, 0);
+			X = V.at<double>(0, 0);
+			Y = V.at<double>(1, 0);
+			Z = V.at<double>(2, 0);
 				
-				cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
-				cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z << endl;
-				break;
-			}		
+			cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
+			cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z << endl;	
 		}
 		else if ((ex[j][0] == 7) || (ex[j][0] == 9))
 		{
@@ -193,73 +185,69 @@ void main()
 			double *L = new double[2 * n];     //L矩阵
 			int t = 0;
 
-			while (1)
+			for (int i = 0; i < n; i++)
 			{
-				for (int i = 0; i < n; i++)
-				{
-					double Xs = ex[j + i + 4][1], Ys = ex[j + i + 4][2], Zs = ex[j + i + 4][3];
-					pitch = ex[j + i + 4][4], roll = ex[j + i + 4][5], yaw = ex[j + i + 4][6];
-					//旋转矩阵 phi = pitch, omiga = roll, kapa = yaw,计算旋转矩阵各元素
+				double Xs = ex[j + i + 4][1], Ys = ex[j + i + 4][2], Zs = ex[j + i + 4][3];
+				pitch = ex[j + i + 4][4], roll = ex[j + i + 4][5], yaw = ex[j + i + 4][6];
+				//旋转矩阵 phi = pitch, omiga = roll, kapa = yaw,计算旋转矩阵各元素
 
-					rotate[0][0] = cos(pitch)*cos(yaw) - sin(pitch)*sin(roll)*sin(yaw);
-					rotate[0][1] = (-1.0)*cos(pitch)*sin(yaw) - sin(pitch)*sin(roll)*cos(yaw);
-					rotate[0][2] = (-1.0)*sin(pitch)*cos(roll);
-					rotate[1][0] = cos(roll)*sin(yaw);
-					rotate[1][1] = cos(roll)*cos(yaw);
-					rotate[1][2] = (-1.0)*sin(roll);
-					rotate[2][0] = sin(pitch)*cos(yaw) + cos(pitch)*sin(roll)*sin(yaw);
-					rotate[2][1] = (-1.0)*sin(pitch)*sin(yaw) + cos(pitch)*sin(roll)*cos(yaw);
-					rotate[2][2] = cos(pitch)*cos(roll);
+				rotate[0][0] = cos(pitch)*cos(yaw) - sin(pitch)*sin(roll)*sin(yaw);
+				rotate[0][1] = (-1.0)*cos(pitch)*sin(yaw) - sin(pitch)*sin(roll)*cos(yaw);
+				rotate[0][2] = (-1.0)*sin(pitch)*cos(roll);
+				rotate[1][0] = cos(roll)*sin(yaw);
+				rotate[1][1] = cos(roll)*cos(yaw);
+				rotate[1][2] = (-1.0)*sin(roll);
+				rotate[2][0] = sin(pitch)*cos(yaw) + cos(pitch)*sin(roll)*sin(yaw);
+				rotate[2][1] = (-1.0)*sin(pitch)*sin(yaw) + cos(pitch)*sin(roll)*cos(yaw);
+				rotate[2][2] = cos(pitch)*cos(roll);
 
 
 
-					/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
-					L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) +
-						(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
-					L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
-						(ex[j + i][2] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
-					/*求a矩阵*/
-					A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
-					A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
-					A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
-					A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
-					A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
-					A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
+				/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
+				L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) +
+					(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+				L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
+					(ex[j + i][2] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+				/*求a矩阵*/
+				A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
+				A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
+				A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
+				A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
+				A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
+				A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
 
-				}
-
-				Mat A_(2 * n, 3, CV_64FC1);   //创建Mat数组，便于opencv矩阵运算
-				Mat L_(2 * n, 1, CV_64FC1);
-				Mat V(3, 1, CV_64FC1);
-				
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 0) = A[i][0];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 1) = A[i][1];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 2) = A[i][2];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					L_.at<double>(i, 0) = L[i];
-				}
-
-
-				V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
-
-				X = V.at<double>(0, 0);
-				Y = V.at<double>(1, 0);
-				Z = V.at<double>(2, 0);
-				
-				cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
-				cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z << endl;
-				break;
 			}
+
+			Mat A_(2 * n, 3, CV_64FC1);   //创建Mat数组，便于opencv矩阵运算
+			Mat L_(2 * n, 1, CV_64FC1);
+			Mat V(3, 1, CV_64FC1);
+				
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 0) = A[i][0];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 1) = A[i][1];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 2) = A[i][2];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				L_.at<double>(i, 0) = L[i];
+			}
+
+
+			V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
+
+			X = V.at<double>(0, 0);
+			Y = V.at<double>(1, 0);
+			Z = V.at<double>(2, 0);
+				
+			cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
+			cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z << endl;
 		}
 		else if ((ex[j][0] == 8))
 		{
@@ -268,73 +256,69 @@ void main()
 			double *L = new double[2 * n];     //L矩阵
 			int t = 0;
 
-			while (1)
+			for (int i = 0; i < n; i++)
 			{
-				for (int i = 0; i < n; i++)
-				{
-					double Xs = ex[j + i + 6][1], Ys = ex[j + i + 6][2], Zs = ex[j + i + 6][3];
-					pitch = ex[j + i + 6][4], roll = ex[j + i + 6][5], yaw = ex[j + i + 6][6];
-					//旋转矩阵 phi = pitch, omiga = roll, kapa = yaw,计算旋转矩阵各元素
+				double Xs = ex[j + i + 6][1], Ys = ex[j + i + 6][2], Zs = ex[j + i + 6][3];
+				pitch = ex[j + i + 6][4], roll = ex[j + i + 6][5], yaw = ex[j + i + 6][6];
+				//旋转矩阵 phi = pitch, omiga = roll, kapa = yaw,计算旋转矩阵各元素
 
-					rotate[0][0] = cos(pitch)*cos(yaw) - sin(pitch)*sin(roll)*sin(yaw);
-					rotate[0][1] = (-1.0)*cos(pitch)*sin(yaw) - sin(pitch)*sin(roll)*cos(yaw);
-					rotate[0][2] = (-1.0)*sin(pitch)*cos(roll);
-					rotate[1][0] = cos(roll)*sin(yaw);
-					rotate[1][1] = cos(roll)*cos(yaw);
-					rotate[1][2] = (-1.0)*sin(roll);
-					rotate[2][0] = sin(pitch)*cos(yaw) + cos(pitch)*sin(roll)*sin(yaw);
-					rotate[2][1] = (-1.0)*sin(pitch)*sin(yaw) + cos(pitch)*sin(roll)*cos(yaw);
-					rotate[2][2] = cos(pitch)*cos(roll);
+				rotate[0][0] = cos(pitch)*cos(yaw) - sin(pitch)*sin(roll)*sin(yaw);
+				rotate[0][1] = (-1.0)*cos(pitch)*sin(yaw) - sin(pitch)*sin(roll)*cos(yaw);
+				rotate[0][2] = (-1.0)*sin(pitch)*cos(roll);
+				rotate[1][0] = cos(roll)*sin(yaw);
+				rotate[1][1] = cos(roll)*cos(yaw);
+				rotate[1][2] = (-1.0)*sin(roll);
+				rotate[2][0] = sin(pitch)*cos(yaw) + cos(pitch)*sin(roll)*sin(yaw);
+				rotate[2][1] = (-1.0)*sin(pitch)*sin(yaw) + cos(pitch)*sin(roll)*cos(yaw);
+				rotate[2][2] = cos(pitch)*cos(roll);
 
 
 
-					/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
-					L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) +
-						(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
-					L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
-						(ex[j + i][2] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
-					/*求a矩阵*/
-					A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
-					A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
-					A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
-					A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
-					A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
-					A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
+				/*计算L矩阵,将未知数近似值带入共线条件方程得到x计*/
+				L[i * 2] = f*(rotate[0][0] * Xs + rotate[1][0] * Ys + rotate[2][0] * Zs) +
+					(ex[j + i][1] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+				L[i * 2 + 1] = f*(rotate[0][1] * Xs + rotate[1][1] * Ys + rotate[2][1] * Zs) +
+					(ex[j + i][2] / 1000) * (rotate[0][2] * Xs + rotate[1][2] * Ys + rotate[2][2] * Zs);
+				/*求a矩阵*/
+				A[i * 2][0] = rotate[0][0] * f + rotate[0][2] * ex[j + i][1] / 1000;
+				A[i * 2][1] = rotate[1][0] * f + rotate[1][2] * ex[j + i][1] / 1000;
+				A[i * 2][2] = rotate[2][0] * f + rotate[2][2] * ex[j + i][1] / 1000;
+				A[i * 2 + 1][0] = rotate[0][1] * f + rotate[0][2] * ex[j + i][2] / 1000;
+				A[i * 2 + 1][1] = rotate[1][1] * f + rotate[1][2] * ex[j + i][2] / 1000;
+				A[i * 2 + 1][2] = rotate[2][1] * f + rotate[2][2] * ex[j + i][2] / 1000;
 
-				}
-
-				Mat A_(2 * n, 3, CV_64FC1);   //创建Mat数组，便于opencv矩阵运算
-				Mat L_(2 * n, 1, CV_64FC1);
-				Mat V(3, 1, CV_64FC1);
-				
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 0) = A[i][0];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 1) = A[i][1];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					A_.at<double>(i, 2) = A[i][2];
-				}
-				for (int i = 0; i < 2 * n; i++)
-				{
-					L_.at<double>(i, 0) = L[i];
-				}
-
-
-				V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
-
-				X = V.at<double>(0, 0);
-				Y = V.at<double>(1, 0);
-				Z = V.at<double>(2, 0);
-				
-				cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
-				cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z<<endl;
-				break;
 			}
+
+			Mat A_(2 * n, 3, CV_64FC1);   //创建Mat数组，便于opencv矩阵运算
+			Mat L_(2 * n, 1, CV_64FC1);
+			Mat V(3, 1, CV_64FC1);
+				
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 0) = A[i][0];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 1) = A[i][1];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				A_.at<double>(i, 2) = A[i][2];
+			}
+			for (int i = 0; i < 2 * n; i++)
+			{
+				L_.at<double>(i, 0) = L[i];
+			}
+
+
+			V = ((A_.t()*A_).inv())*A_.t()*L_;  //计算改正数数组
+
+			X = V.at<double>(0, 0);
+			Y = V.at<double>(1, 0);
+			Z = V.at<double>(2, 0);
+				
+			cout << fixed << setprecision(0) << "地面点：" << ex[j][0] << endl;
+			cout << fixed << setprecision(3) << X << "  " << Y << "  " << Z<<endl;
 		}
 		j++;
 	}
