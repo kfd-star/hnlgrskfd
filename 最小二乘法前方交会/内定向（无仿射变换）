@@ -1,0 +1,41 @@
+#include <iostream>
+#include <fstream>
+#include "..\qfjh-zx2c\matrix.h"
+using namespace std;
+
+int main()
+{
+	double pixel = 0.006;    //mm
+	double width = 11310;	//列
+	double height = 17310;	//行
+	double x_offset = (width*pixel) / 2;
+	double y_offset = -(height*pixel) / 2;
+
+	/*读入txt数据*/
+	double kuangbiao[42][2] = { 0 };    //读入框标文件
+	double xiangdian[42][2] = { 0 };
+	ifstream file("D:\\29203\\Desktop\\work\\kuangbiao.txt");
+	if (!file.is_open())
+	{
+		cout << "不能打开数据。" << endl;
+
+		return 0;
+	}
+	for (int i = 0; i < 42; i++)
+	{
+		for (int j = 0; j < 2;j++)
+		{
+			file >> kuangbiao[i][j];
+		}
+	}
+	for (int i = 0; i < 42; i++)
+	{
+		xiangdian[i][0] = kuangbiao[i][0] * pixel - x_offset;
+		xiangdian[i][1] = -kuangbiao[i][1] * pixel - y_offset;
+	}
+	/*写出像平面坐标*/
+	cout << "像点坐标为：" << endl;
+	output(*xiangdian,42, 2);
+	system("pause");
+	return 0;
+}
